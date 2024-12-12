@@ -57,11 +57,26 @@ export interface ErrorContextProps {
     onError: (error: Error, code: string, contextInfo?: Record<string, unknown>) => void;
 }
 
-export interface MetadataSidebarRedesignProps extends PropsWithoutContext, ErrorContextProps, WithLoggerProps {
+export interface SuccessContextProps {
+    onSuccess: (code: string, showNotification: boolean) => void;
+}
+
+export interface MetadataSidebarRedesignProps
+    extends PropsWithoutContext,
+        ErrorContextProps,
+        SuccessContextProps,
+        WithLoggerProps {
     api: API;
 }
 
-function MetadataSidebarRedesign({ api, elementId, fileId, onError, isFeatureEnabled }: MetadataSidebarRedesignProps) {
+function MetadataSidebarRedesign({
+    api,
+    elementId,
+    fileId,
+    onError,
+    onSuccess,
+    isFeatureEnabled,
+}: MetadataSidebarRedesignProps) {
     const {
         extractSuggestions,
         file,
@@ -72,7 +87,7 @@ function MetadataSidebarRedesign({ api, elementId, fileId, onError, isFeatureEna
         errorMessage,
         status,
         templateInstances,
-    } = useSidebarMetadataFetcher(api, fileId, onError, isFeatureEnabled);
+    } = useSidebarMetadataFetcher(api, fileId, onError, onSuccess, isFeatureEnabled);
 
     const { formatMessage } = useIntl();
     const isBoxAiSuggestionsEnabled: boolean = useFeatureEnabled('metadata.aiSuggestions.enabled');

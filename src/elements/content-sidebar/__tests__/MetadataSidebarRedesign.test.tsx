@@ -93,6 +93,7 @@ describe('elements/content-sidebar/Metadata/MetadataSidebarRedesign', () => {
             elementId: 'element-1',
             isFeatureEnabled: true,
             onError: jest.fn(),
+            onSuccess: jest.fn(),
         } satisfies MetadataSidebarRedesignProps;
 
         render(<MetadataSidebarRedesign {...defaultProps} {...props} />, { wrapperProps: { features } });

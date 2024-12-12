@@ -5,6 +5,9 @@ import {
     ERROR_CODE_EMPTY_METADATA_SUGGESTIONS,
     ERROR_CODE_FETCH_METADATA_SUGGESTIONS,
     FIELD_PERMISSIONS_CAN_UPLOAD,
+    SUCCESS_CODE_DELETE_METADATA_TEMPLATE_INSTANCE,
+    SUCCESS_CODE_UPDATE_METADATA_TEMPLATE_INSTANCE,
+    SUCCESS_CODE_EXTRACT_METADATA_SUGGESTIONS,
 } from '../../../constants';
 import useSidebarMetadataFetcher, { STATUS } from '../hooks/useSidebarMetadataFetcher';
 
@@ -119,13 +122,15 @@ const api = {
 
 describe('useSidebarMetadataFetcher', () => {
     const onErrorMock = jest.fn();
+    const onSuccessMock = jest.fn();
     const isFeatureEnabledMock = true;
 
     const setupHook = (fileId = '123') =>
-        renderHook(() => useSidebarMetadataFetcher(api, fileId, onErrorMock, isFeatureEnabledMock));
+        renderHook(() => useSidebarMetadataFetcher(api, fileId, onErrorMock, onSuccessMock, isFeatureEnabledMock));
 
     beforeEach(() => {
         onErrorMock.mockClear();
+        onSuccessMock.mockClear();
         mockAPI.getFile.mockClear();
         mockAPI.getMetadata.mockClear();
         mockAPI.deleteMetadata.mockClear();
@@ -154,6 +159,7 @@ describe('useSidebarMetadataFetcher', () => {
 
         expect(result.current.file).toBeUndefined();
         expect(result.current.errorMessage).toBe(messages.sidebarMetadataEditingErrorContent);
+        expect(onSuccessMock).not.toHaveBeenCalled();
         expect(onErrorMock).toHaveBeenCalledWith(
             mockError,
             'file_fetch_error',
@@ -177,6 +183,7 @@ describe('useSidebarMetadataFetcher', () => {
 
         expect(result.current.templates).toBeNull();
         expect(result.current.errorMessage).toBe(messages.sidebarMetadataFetchingErrorContent);
+        expect(onSuccessMock).not.toHaveBeenCalled();
         expect(onErrorMock).toHaveBeenCalledWith(
             mockError,
             'metadata_fetch_error',
@@ -203,6 +210,7 @@ describe('useSidebarMetadataFetcher', () => {
         expect(result.current.templates).toEqual(mockTemplates);
         expect(result.current.status).toEqual(STATUS.SUCCESS);
         expect(result.current.errorMessage).toBeNull();
+        expect(onSuccessMock).toHaveBeenCalledWith(SUCCESS_CODE_DELETE_METADATA_TEMPLATE_INSTANCE, true);
     });
 
     test('should handle metadata instance removal error', async () => {
@@ -219,6 +227,7 @@ describe('useSidebarMetadataFetcher', () => {
         await waitFor(() => result.current.handleDeleteMetadataInstance(mockTemplateInstances[0]));
 
         expect(result.current.status).toEqual(STATUS.ERROR);
+        expect(onSuccessMock).not.toHaveBeenCalled();
         expect(onErrorMock).toHaveBeenCalledWith(
             mockError,
             'metadata_remove_error',
@@ -245,6 +254,7 @@ describe('useSidebarMetadataFetcher', () => {
         await waitFor(() => result.current.handleCreateMetadataInstance(newTemplateInstance, successCallback));
 
         expect(successCallback).toHaveBeenCalled();
+        expect(onSuccessMock).not.toHaveBeenCalled();
     });
 
     test('should handle metadata instance creation error', async () => {
@@ -261,6 +271,7 @@ describe('useSidebarMetadataFetcher', () => {
         await waitFor(() => result.current.handleCreateMetadataInstance(newTemplateInstance, jest.fn()));
 
         expect(result.current.status).toBe(STATUS.ERROR);
+        expect(onSuccessMock).not.toHaveBeenCalled();
         expect(onErrorMock).toHaveBeenCalledWith(
             mockError,
             'metadata_creation_error',
@@ -288,6 +299,7 @@ describe('useSidebarMetadataFetcher', () => {
             result.current.handleUpdateMetadataInstance(mockTemplateInstances[0], ops, successCallback),
         );
         expect(successCallback).toHaveBeenCalled();
+        expect(onSuccessMock).toHaveBeenCalledWith(SUCCESS_CODE_UPDATE_METADATA_TEMPLATE_INSTANCE, true);
     });
 
     test('should handle metadata update error', async () => {
@@ -307,6 +319,7 @@ describe('useSidebarMetadataFetcher', () => {
         );
 
         expect(successCallback).not.toHaveBeenCalled();
+        expect(onSuccessMock).not.toHaveBeenCalled();
 
         expect(result.current.status).toEqual(STATUS.ERROR);
         expect(result.current.templates).toEqual(mockTemplates);
@@ -339,6 +352,7 @@ describe('useSidebarMetadataFetcher', () => {
                 { ...mockTemplateInstances[0].fields[0], aiSuggestion: 'value1' },
                 { ...mockTemplateInstances[0].fields[1], aiSuggestion: 'value2' },
             ]);
+            expect(onSuccessMock).toHaveBeenCalledWith(SUCCESS_CODE_EXTRACT_METADATA_SUGGESTIONS, true);
         });
 
         test('should handle error during suggestions extraction', async () => {
@@ -348,6 +362,7 @@ describe('useSidebarMetadataFetcher', () => {
             const suggestions = await result.current.extractSuggestions('templateKey', 'global');
 
             expect(suggestions).toEqual([]);
+            expect(onSuccessMock).not.toHaveBeenCalled();
             expect(onErrorMock).toHaveBeenCalledWith(
                 mockError,
                 ERROR_CODE_FETCH_METADATA_SUGGESTIONS,
@@ -364,6 +379,7 @@ describe('useSidebarMetadataFetcher', () => {
             const suggestions = await result.current.extractSuggestions('templateKey', 'global');
 
             expect(suggestions).toEqual([]);
+            expect(onSuccessMock).not.toHaveBeenCalled();
             expect(onErrorMock).toHaveBeenCalledWith(
                 new Error('No suggestions found.'),
                 ERROR_CODE_EMPTY_METADATA_SUGGESTIONS,
