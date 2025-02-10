@@ -262,7 +262,7 @@ function MetadataSidebarRedesign({
                         <MetadataInstanceList
                             areAiSuggestionsAvailable={areAiSuggestionsAvailable}
                             isAiSuggestionsFeatureEnabled={isBoxAiSuggestionsEnabled}
-                            // iaBetaLanguageEnabled={isBetaLanguageEnabled}
+                            isBetaLanguageEnabled={isBetaLanguageEnabled}
                             onEdit={templateInstance => {
                                 setEditingTemplate(templateInstance);
                                 setIsDeleteButtonDisabled(false);
